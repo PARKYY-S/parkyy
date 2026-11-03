@@ -1,0 +1,13 @@
+{
+  "name": "parkyy-desktop",
+  "version": "0.1.0",
+  "description": "PARKYY built into the Windows desktop",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^44.4.5"
+  }
+}

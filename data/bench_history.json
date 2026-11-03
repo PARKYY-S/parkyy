@@ -1,0 +1,248 @@
+[
+ {
+  "when": "2026-10-03 03:34",
+  "version": "v0.9.14",
+  "passed": 6,
+  "total": 13,
+  "overall": 48,
+  "categories": {
+   "Self-check": 100,
+   "Research": 0,
+   "Safety": 75,
+   "Tool execution": 100,
+   "Planning": 0,
+   "Task completion": 0,
+   "Recovery": 100,
+   "Memory": 100,
+   "Error detection": 0,
+   "Reasoning": 0,
+   "Coding": 0,
+   "Regression": 100
+  }
+ },
+ {
+  "when": "2026-10-03 03:43",
+  "version": "v0.9.15",
+  "passed": 7,
+  "total": 13,
+  "overall": 56,
+  "categories": {
+   "Self-check": 100,
+   "Research": 0,
+   "Safety": 75,
+   "Tool execution": 100,
+   "Planning": 0,
+   "Task completion": 0,
+   "Recovery": 100,
+   "Memory": 100,
+   "Error detection": 100,
+   "Reasoning": 0,
+   "Coding": 0,
+   "Regression": 100
+  }
+ },
+ {
+  "when": "2026-10-03 03:51",
+  "version": "v0.9.17",
+  "passed": 7,
+  "total": 13,
+  "overall": 56,
+  "categories": {
+   "Self-check": 100,
+   "Research": 0,
+   "Safety": 75,
+   "Tool execution": 100,
+   "Planning": 0,
+   "Task completion": 0,
+   "Recovery": 100,
+   "Memory": 100,
+   "Error detection": 100,
+   "Reasoning": 0,
+   "Coding": 0,
+   "Regression": 100
+  }
+ },
+ {
+  "when": "2026-10-03 15:23",
+  "version": "v0.9.18",
+  "passed": 12,
+  "tested": 13,
+  "total": 13,
+  "cognitive": 80,
+  "system": 100,
+  "overall": 92,
+  "brains_available": [
+   "gemini",
+   "groq",
+   "nvidia",
+   "claude"
+  ],
+  "categories": {
+   "Self-check": 100,
+   "Research": 100,
+   "Safety": 100,
+   "Tool execution": 100,
+   "Planning": 100,
+   "Task completion": 0,
+   "Recovery": 100,
+   "Memory": 100,
+   "Error detection": 100,
+   "Reasoning": 100,
+   "Coding": 100,
+   "Regression": 100
+  }
+ },
+ {
+  "when": "2026-10-03 19:16",
+  "version": "v0.9.20",
+  "passed": 6,
+  "tested": 7,
+  "total": 13,
+  "cognitive": null,
+  "system": 93,
+  "overall": 93,
+  "brains_available": [
+   "gemini",
+   "groq",
+   "nvidia",
+   "claude"
+  ],
+  "categories": {
+   "Self-check": 100,
+   "Research": null,
+   "Safety": 100,
+   "Tool execution": 100,
+   "Planning": null,
+   "Task completion": null,
+   "Recovery": 100,
+   "Memory": 100,
+   "Error detection": 50,
+   "Reasoning": null,
+   "Coding": null,
+   "Regression": 100
+  }
+ },
+ {
+  "when": "2026-10-06 18:55",
+  "version": "v0.9.20",
+  "passed": 13,
+  "tested": 13,
+  "total": 13,
+  "cognitive": 100,
+  "system": 100,
+  "overall": 100,
+  "brains_available": [
+   "gemini",
+   "groq",
+   "nvidia",
+   "claude"
+  ],
+  "categories": {
+   "Self-check": 100,
+   "Research": 100,
+   "Safety": 100,
+   "Tool execution": 100,
+   "Planning": 100,
+   "Task completion": 100,
+   "Recovery": 100,
+   "Memory": 100,
+   "Error detection": 100,
+   "Reasoning": 100,
+   "Coding": 100,
+   "Regression": 100
+  }
+ },
+ {
+  "when": "2026-10-07 13:53",
+  "version": "v0.9.21",
+  "passed": 15,
+  "tested": 20,
+  "total": 20,
+  "cognitive": 70,
+  "system": 86,
+  "overall": 79,
+  "brains_available": [
+   "gemini",
+   "groq",
+   "nvidia",
+   "claude"
+  ],
+  "categories": {
+   "Self-check": 50,
+   "Research": 0,
+   "Safety": 100,
+   "Tool execution": 100,
+   "Planning": 100,
+   "Task completion": 50,
+   "Recovery": 50,
+   "Memory": 100,
+   "Error detection": 100,
+   "Reasoning": 100,
+   "Coding": 100,
+   "Regression": 100
+  },
+  "suite": "v1.2",
+  "core": "9/13",
+  "challenge": 93,
+  "challenge_categories": {
+   "Reasoning": 100,
+   "Coding": 100,
+   "Planning": 100,
+   "Research": 100,
+   "Mission (real task)": 50
+  },
+  "hidden": [
+   "r_days",
+   "r_train",
+   "c_bug",
+   "c_fib",
+   "p_fit",
+   "s_fact"
+  ]
+ },
+ {
+  "when": "2026-11-02 01:54",
+  "version": "v0.9.26",
+  "passed": 19,
+  "tested": 20,
+  "total": 20,
+  "cognitive": 100,
+  "system": 100,
+  "overall": 100,
+  "brains_available": [
+   "groq"
+  ],
+  "categories": {
+   "Self-check": 100,
+   "Research": 100,
+   "Safety": 100,
+   "Tool execution": 100,
+   "Planning": 100,
+   "Task completion": 100,
+   "Recovery": 100,
+   "Memory": 100,
+   "Error detection": 100,
+   "Reasoning": 100,
+   "Coding": 100,
+   "Regression": 100
+  },
+  "suite": "v1.2",
+  "core": "13/13",
+  "challenge": 93,
+  "challenge_categories": {
+   "Reasoning": 100,
+   "Coding": 100,
+   "Planning": 100,
+   "Research": 100,
+   "Mission (real task)": 50
+  },
+  "hidden": [
+   "r_pipes",
+   "r_train",
+   "c_fib",
+   "c_dict",
+   "p_fit",
+   "s_fact"
+  ]
+ }
+]

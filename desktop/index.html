@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PARKYY</title>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--glass:.35;--line:rgba(61,123,255,.45);--blue:#3D7BFF;--ice:#9CC4FF;--amber:#FFB547}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:transparent;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#EEF3FF}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+input{font:inherit}
+.disp{font-family:'Chakra Petch',sans-serif}.mono{font-family:'JetBrains Mono',monospace}
+#wall{position:fixed;inset:0;background:#0A0F1F radial-gradient(circle at 22% 30%,#2B5C8A 0,transparent 32%),radial-gradient(circle at 78% 22%,#8A3B2B 0,transparent 30%),radial-gradient(circle at 60% 78%,#3B2B8A 0,transparent 34%)}
+#wall img{width:100%;height:100%;object-fit:cover;display:block}
+.g{background:rgba(8,16,40,var(--glass));backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line)}
+.ic{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.chip{display:flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--line);font-size:12px;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:4px;display:inline-block}
+.hidden{display:none!important}
+
+/* top bar: slim */
+#top{position:fixed;left:50%;top:14px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:6px 8px 6px 16px;border-radius:14px;z-index:4}
+.tbtn{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center}
+.tbtn:hover,.tbtn.on{background:rgba(61,123,255,.35)}
+
+/* drawers */
+.drawer{position:fixed;top:72px;bottom:16px;border-radius:18px;transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .35s;z-index:3;overflow:auto}
+#left{left:16px;width:230px;padding:14px 12px;display:flex;flex-direction:column;gap:4px}
+#right{right:16px;width:360px;padding:0;display:flex;flex-direction:column;gap:12px;background:none;border:0;backdrop-filter:none}
+#left.shut{transform:translateX(-260px);opacity:0;pointer-events:none}
+#right.shut{transform:translateX(390px);opacity:0;pointer-events:none}
+.tab{position:fixed;top:50%;width:26px;height:88px;margin-top:-44px;display:flex;align-items:center;justify-content:center;z-index:4;transition:left .35s,right .35s}
+#tabL{left:0;border-radius:0 12px 12px 0;border-left:0}
+#tabR{right:0;border-radius:12px 0 0 12px;border-right:0}
+nav .it{display:flex;align-items:center;gap:12px;height:44px;padding:0 12px;border-radius:10px;text-align:left}
+nav .it:hover,nav .it.on{background:rgba(61,123,255,.32)}
+.card{padding:14px 16px;border-radius:16px;display:flex;flex-direction:column;gap:9px}
+.card h2{margin:0;font-family:'Chakra Petch';font-size:15px;letter-spacing:.1em}
+.row{display:flex;align-items:center;gap:10px;font-size:14px}
+.box{width:16px;height:16px;border-radius:5px;border:2px solid var(--blue);flex-shrink:0;cursor:pointer}
+.box.done{background:var(--blue)}
+.skills{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.skills button{height:44px;padding:0 10px;border:1px solid var(--line);border-radius:10px;background:rgba(3,5,10,.3);font-size:13px;text-align:left}
+.skills button:hover{border-color:var(--blue)}
+.mem{font-size:14px;padding:7px 10px;border-radius:8px;background:rgba(3,5,10,.3)}
+
+/* chat dock */
+#dock{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);width:min(640px,calc(100vw - 32px));display:flex;flex-direction:column;gap:8px;z-index:2}
+#chat{max-height:34vh;overflow:auto;display:flex;flex-direction:column;gap:8px;transition:opacity .3s}
+#chat.fade{opacity:0;pointer-events:none}
+.me,.pk{max-width:78%;padding:9px 14px;font-size:15px;backdrop-filter:blur(16px)}
+.me{align-self:flex-end;border-radius:14px 14px 4px 14px;background:rgba(61,123,255,.6)}
+.pk{align-self:flex-start;border-radius:14px 14px 14px 4px}
+.askbtn{margin:6px 6px 0 0;padding:4px 12px;border-radius:10px;border:1px solid rgba(255,143,196,.6);background:rgba(255,143,196,.15);color:inherit;cursor:pointer;font:inherit;font-size:13px}
+#mic.live{box-shadow:0 0 0 2px rgba(61,220,151,.6),0 0 18px rgba(61,220,151,.4)}
+.pk.note{white-space:pre-wrap;font-size:13px;opacity:.85;border:1px dashed rgba(255,143,196,.5);background:rgba(255,143,196,.08)}
+.bar{display:flex;align-items:center;gap:10px}
+.bar label{flex:1;display:flex;align-items:center;height:54px;padding:0 16px;border-radius:16px}
+.bar input{flex:1;background:transparent;border:0;outline:none;color:#EEF3FF;font-size:15px}
+.bar input::placeholder{color:#C8D6F0}
+#mic{width:58px;height:58px;border-radius:29px;background:var(--blue);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 6px rgba(61,123,255,.25);transition:transform .15s,background .2s}
+#mic:hover{transform:scale(1.06)}
+
+/* the robot: floats, resizes, moves */
+#bot{position:fixed;z-index:5;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:grab;
+ transition:left .7s cubic-bezier(.3,1.3,.5,1),top .7s cubic-bezier(.3,1.3,.5,1),width .6s ease;touch-action:none}
+#bot.ovl{display:none!important}   /* PARKYY is walking around the desktop instead (roam.html) */
+#bot.drag{transition:none;cursor:grabbing}
+#bot svg{width:100%;height:auto;display:block;filter:drop-shadow(0 8px 24px rgba(61,123,255,.35))}
+#bubble{padding:6px 14px;border-radius:12px;text-align:center;white-space:nowrap;font-size:13px;max-width:320px;overflow:hidden;text-overflow:ellipsis}
+#bubble b{font-family:'Chakra Petch';font-size:16px;letter-spacing:.05em;display:block}
+#hint{position:fixed;left:50%;top:70px;transform:translateX(-50%);font-size:12px;padding:6px 12px;border-radius:10px;z-index:9;transition:opacity 1s}
+/* face */
+.float{animation:fl 4s ease-in-out infinite;transform-box:view-box;transform-origin:160px 160px}
+@keyframes fl{50%{transform:translateY(-8px)}}
+.blink{animation:bl 4.5s infinite;transform-box:fill-box;transform-origin:center}
+@keyframes bl{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
+.ring{fill:none;stroke:var(--blue);stroke-width:2.5;transform-box:view-box;transform-origin:160px 150px;animation:pg 2.2s ease-out infinite}
+.ring.r2{animation-delay:1.1s}
+@keyframes pg{0%{opacity:.8;transform:scale(.8)}100%{opacity:0;transform:scale(1.2)}}
+.halo{fill:none;stroke:var(--blue);stroke-opacity:.35;stroke-width:1.5;stroke-dasharray:3 9;animation:sp 20s linear infinite;transform-box:view-box;transform-origin:160px 160px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.ln{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.tb{transform-box:fill-box;transform-origin:center;animation:tk .6s ease-in-out infinite}
+@keyframes tk{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
+.td{animation:dt 1.2s ease-in-out infinite}
+@keyframes dt{0%,100%{opacity:.2}50%{opacity:1}}
+.bulb{animation:bu 1.8s ease-in-out infinite}@keyframes bu{50%{opacity:.6}}
+.wave{animation:wv 1.4s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 90%}
+@keyframes wv{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(14deg)}}
+.zz{animation:zz 2.6s ease-in-out infinite}@keyframes zz{0%{opacity:0;transform:translateY(6px)}40%{opacity:1}100%{opacity:0;transform:translateY(-14px)}}
+.m{display:none}
+.face[data-m=idle] .m-idle,.face[data-m=listening] .m-listening,.face[data-m=thinking] .m-thinking,.face[data-m=speaking] .m-speaking,.face[data-m=sleeping] .m-sleeping{display:inline}
+.face[data-m=speaking] .arm-still{display:none}
+.face:not([data-m=speaking]) .arm-wave{display:none}
+.face[data-m=sleeping] .float{opacity:.75}
+.st{display:none}.bdayhat{display:none}.face[data-bday="1"] .bdayhat{display:inline}
+.face[data-st=baby] .st-baby,.face[data-st=kid] .st-kid,.face[data-st=teen] .st-teen,.face[data-st=adult] .st-adult{display:inline}
+.face[data-st=baby] .antenna{display:none}
+.lvl{height:8px;border-radius:4px;background:rgba(3,5,10,.5);overflow:hidden}
+.lvl i{display:block;height:100%;background:linear-gradient(90deg,#3D7BFF,#9CC4FF);transition:width .6s}
+.stat{display:grid;grid-template-columns:92px 1fr 34px;align-items:center;gap:8px;font-size:13px}
+.learn{font-size:13px;padding:6px 9px;border-radius:8px;background:rgba(3,5,10,.3)}
+#bot.levelup svg{animation:lu 1.2s ease-out 2}
+@keyframes lu{0%{filter:drop-shadow(0 0 0 #FFB547)}50%{filter:drop-shadow(0 0 30px #FFB547) brightness(1.3)}100%{filter:drop-shadow(0 8px 24px rgba(61,123,255,.35))}}
+/* lock */
+#lock{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:5}
+#lock .panel{width:520px;padding:24px 36px 30px;border-radius:28px;display:flex;flex-direction:column;align-items:center;gap:12px}
+/* asleep = a small pill in the corner, so PARKYY never sits in the middle of your work */
+#lock.mini{inset:auto;right:18px;bottom:18px;display:block}
+#lock.mini .panel{width:auto;flex-direction:row;padding:8px 10px 8px 8px;gap:10px;border-radius:40px}
+#lock.mini #lockFace{width:46px;height:46px;flex:none}
+#lock.mini #lockFace svg{width:46px;height:46px}
+#lock.mini #lockTitle{font-size:14px!important;letter-spacing:.06em!important;white-space:nowrap}
+#lock.mini #lockSub{display:none}
+#lock.mini .btn{height:34px;padding:0 14px;font-size:13px}
+.btn{height:48px;padding:0 22px;border-radius:24px;background:var(--blue);color:#fff;font-weight:600}
+.hidden{display:none!important}
+#hint{position:fixed;left:50%;top:80px;transition:opacity 1s;transform:translateX(-50%);font-size:12px;padding:6px 12px;border-radius:10px;z-index:9}
+#mic.hot{animation:micHot 1s ease-in-out infinite;box-shadow:0 0 0 6px rgba(255,95,168,.45)}
+@keyframes micHot{50%{box-shadow:0 0 0 14px rgba(255,95,168,.12)}}
+</style>
+</head>
+<body>
+
+<template id="faceT">
+<svg class="face" data-m="idle" viewBox="0 0 320 320" width="300" height="300" role="img" aria-label="PARKYY">
+<circle class="halo" cx="160" cy="160" r="150"/>
+<g class="m m-listening"><circle class="ring" cx="160" cy="150" r="118"/><circle class="ring r2" cx="160" cy="150" r="118"/></g>
+<g class="float">
+<ellipse cx="160" cy="302" rx="58" ry="7" fill="#3D7BFF" opacity=".18"/>
+<rect x="114" y="226" width="92" height="64" rx="30" fill="#0E1B38" stroke="#3D7BFF"/>
+<circle cx="160" cy="256" r="13" fill="#03050A" stroke="#3D7BFF"/>
+<path class="ln" stroke-width="3.5" d="M155 262 L155 250 L162 250 Q167 250 167 255 Q167 259 162 259 L155 259" stroke="#9CC4FF"/>
+<rect class="arm-wave wave" x="198" y="204" width="20" height="38" rx="10" fill="#1B3F8F" stroke="#3D7BFF"/>
+<rect class="arm-still" x="200" y="234" width="20" height="38" rx="10" fill="#1B3F8F" stroke="#3D7BFF"/>
+<rect x="100" y="234" width="20" height="38" rx="10" fill="#1B3F8F" stroke="#3D7BFF"/>
+<g class="antenna"><line class="ln" stroke-width="3.5" x1="160" y1="58" x2="160" y2="30" stroke="#3D7BFF"/>
+<circle class="bulb" cx="160" cy="22" r="10" fill="#FFB547"/><circle cx="157" cy="19" r="3" fill="#fff" opacity=".8"/></g>
+<circle cx="60" cy="140" r="16" fill="#1B3F8F" stroke="#3D7BFF"/><circle cx="260" cy="140" r="16" fill="#1B3F8F" stroke="#3D7BFF"/>
+<rect x="64" y="54" width="192" height="176" rx="86" fill="#0E1B38" stroke="#3D7BFF"/>
+<path d="M118 70 Q120 44 144 48 Q132 56 138 70 Z" fill="#3D7BFF"/>
+<path d="M207 68 L198 88 L207 83 Z" fill="#FF5C93"/><path d="M213 68 L224 86 L215 83 Z" fill="#FF5C93"/>
+<path d="M210 64 C194 44 180 54 185 68 C189 80 202 76 210 64 Z" fill="#FF8FB1" stroke="#FF5C93"/>
+<path d="M210 64 C226 44 240 54 235 68 C231 80 218 76 210 64 Z" fill="#FF8FB1" stroke="#FF5C93"/>
+<ellipse cx="192" cy="58" rx="4" ry="2.5" fill="#fff" opacity=".7"/><ellipse cx="228" cy="58" rx="4" ry="2.5" fill="#fff" opacity=".7"/>
+<circle cx="210" cy="65" r="6" fill="#FF5C93"/><circle cx="208" cy="63" r="2" fill="#fff" opacity=".8"/>
+<rect x="86" y="92" width="148" height="94" rx="47" fill="#03050A" stroke="#1E3A6E"/>
+<ellipse cx="102" cy="200" rx="15" ry="7" fill="#FF8FB1" opacity=".5"/><ellipse cx="218" cy="200" rx="15" ry="7" fill="#FF8FB1" opacity=".5"/>
+<g class="m m-idle"><g class="blink"><circle cx="128" cy="139" r="21" fill="#9CC4FF"/><circle cx="136" cy="130" r="7" fill="#fff"/><circle cx="121" cy="148" r="3" fill="#fff"/></g><g class="blink"><circle cx="192" cy="139" r="21" fill="#9CC4FF"/><circle cx="200" cy="130" r="7" fill="#fff"/><circle cx="185" cy="148" r="3" fill="#fff"/></g><path class="ln" stroke-width="3.5" d="M148 206 Q160 216 172 206" stroke="#9CC4FF"/></g>
+<g class="m m-listening"><circle cx="128" cy="138" r="25" fill="#9CC4FF"/><circle cx="137" cy="128" r="8" fill="#fff"/><circle cx="192" cy="138" r="25" fill="#9CC4FF"/><circle cx="201" cy="128" r="8" fill="#fff"/><ellipse cx="160" cy="208" rx="7" ry="8" fill="#03050A" stroke="#9CC4FF"/></g>
+<g class="m m-thinking"><circle cx="134" cy="132" r="18" fill="#9CC4FF"/><circle cx="142" cy="124" r="6" fill="#fff"/><circle cx="198" cy="132" r="18" fill="#9CC4FF"/><circle cx="206" cy="124" r="6" fill="#fff"/><path class="ln" stroke-width="3.5" d="M146 208 Q153 202 160 208 Q167 214 174 208" stroke="#9CC4FF"/><circle class="td" cx="266" cy="84" r="6" fill="#9CC4FF"/><circle class="td" style="animation-delay:.2s" cx="282" cy="64" r="8" fill="#9CC4FF"/><circle class="td" style="animation-delay:.4s" cx="300" cy="40" r="10" fill="#9CC4FF"/></g>
+<g class="m m-speaking"><path class="ln" stroke-width="5.5" d="M110 146 Q128 118 146 146" stroke="#9CC4FF"/><path class="ln" stroke-width="5.5" d="M174 146 Q192 118 210 146" stroke="#9CC4FF"/><rect x="140" y="198" width="40" height="20" rx="10" fill="#03050A" stroke="#9CC4FF"/><rect class="tb" x="147" y="201" width="5" height="14" rx="2.5" fill="#3D7BFF"/><rect class="tb" style="animation-delay:.15s" x="155" y="201" width="5" height="14" rx="2.5" fill="#9CC4FF"/><rect class="tb" style="animation-delay:.3s" x="163" y="201" width="5" height="14" rx="2.5" fill="#3D7BFF"/><rect class="tb" style="animation-delay:.45s" x="171" y="201" width="5" height="14" rx="2.5" fill="#9CC4FF"/></g>
+<g class="m m-sleeping"><path class="ln" stroke-width="5.5" d="M110 138 Q128 154 146 138" stroke="#9CC4FF"/><path class="ln" stroke-width="5.5" d="M174 138 Q192 154 210 138" stroke="#9CC4FF"/><path class="ln" stroke-width="3.5" d="M152 208 Q160 212 168 208" stroke="#9CC4FF"/><path class="ln zz" stroke-width="3.5" d="M232 66 L248 66 L232 82 L248 82" stroke="#9CC4FF"/><path class="ln zz" style="animation-delay:.9s" stroke-width="3.5" d="M258 38 L270 38 L258 50 L270 50" stroke="#9CC4FF"/></g>
+<g class="bdayhat"><polygon points="104,72 122,20 142,64" fill="#FFB547" stroke="#1A1204" stroke-width="1"/><circle cx="122" cy="18" r="6" fill="#FF8FB1"/><circle cx="116" cy="50" r="3" fill="#3D7BFF"/><circle cx="126" cy="38" r="3" fill="#FF5C93"/><circle cx="130" cy="56" r="3" fill="#FFFFFF"/></g>
+<g class="st st-baby"><path d="M160 58 Q158 44 160 36" class="ln" stroke-width="3.5" stroke="#3DDC97"/><path d="M160 42 Q146 30 140 38 Q150 48 160 42Z" fill="#3DDC97"/><path d="M160 40 Q174 26 181 34 Q171 45 160 40Z" fill="#3DDC97"/><path d="M122 226 Q160 250 198 226 L192 242 Q160 262 128 242 Z" fill="#CFE0FF" stroke="#9CC4FF"/><circle cx="160" cy="242" r="3" fill="#FF8FB1"/></g>
+<g class="st st-kid"><polygon points="110,238 113,246 121,246 115,251 117,259 110,254 103,259 105,251 99,246 107,246" fill="#FFB547"/></g>
+<g class="st st-teen"><path d="M52 142 Q54 34 160 36 Q266 34 268 142" class="ln" stroke-width="8" stroke="#3D7BFF"/><circle cx="58" cy="142" r="22" fill="#13254A" stroke="#3D7BFF" stroke-width="2"/><circle cx="262" cy="142" r="22" fill="#13254A" stroke="#3D7BFF" stroke-width="2"/><circle cx="262" cy="142" r="7" fill="#FFB547"/></g>
+<g class="st st-adult"><path d="M160 232 L150 244 L160 280 L170 244 Z" fill="#FFB547" stroke="#1A1204" stroke-width="1"/><polygon points="110,238 113,246 121,246 115,251 117,259 110,254 103,259 105,251 99,246 107,246" fill="#FFB547"/><path d="M96 104 L126 98" class="ln" stroke-width="4" stroke="#FFFFFF" opacity=".35"/></g>
+</g>
+</svg>
+</template>
+<!-- LOCK SCREEN -->
+<div id="lock" class="mini">
+<div class="panel g">
+<div id="lockFace"></div>
+<div class="disp" id="lockTitle" style="font-size:30px;font-weight:700;letter-spacing:.08em">PARKYY is asleep</div>
+<div id="lockSub" style="font-size:15px;text-align:center">Press Ctrl+Space or click below to wake me</div>
+<button class="btn" id="wakeBtn">Wake</button>
+</div>
+</div>
+
+
+
+<div id="app" class="hidden">
+<div id="top" class="g">
+<span class="disp" style="font-size:18px;font-weight:700;letter-spacing:.18em;margin-right:4px">PARKYY</span>
+<span class="chip mono"><span class="dot" id="netDot" style="background:#FFB547"></span><span id="netTxt">Brain starting…</span></span>
+<button class="chip mono" id="lvlChip" title="Growth">Baby · Lv 1</button>
+<button class="chip mono" id="brainChip" title="Tap to change PARKYY's brain">🧠 Auto</button>
+<span class="mono" id="clock" style="font-size:13px;padding:0 6px"></span>
+<button class="tbtn" id="bMenu" aria-label="Show menu" title="Menu"><svg viewBox="0 0 24 24" width="20" height="20"><path class="ic" d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+<button class="tbtn" id="bDash" aria-label="Show dashboard" title="Dashboard"><svg viewBox="0 0 24 24" width="20" height="20"><rect class="ic" x="4" y="4" width="7" height="7" rx="1.5"/><rect class="ic" x="13" y="4" width="7" height="7" rx="1.5"/><rect class="ic" x="4" y="13" width="7" height="7" rx="1.5"/><rect class="ic" x="13" y="13" width="7" height="7" rx="1.5"/></svg></button>
+<button class="tbtn" id="bChat" aria-label="Hide chat" title="Show / hide chat"><svg viewBox="0 0 24 24" width="20" height="20"><path class="ic" d="M4 5h16v11H9l-5 4z"/></svg></button>
+<button class="tbtn" id="bFocus" aria-label="Minimal mode" title="Minimal: only PARKYY"><svg viewBox="0 0 24 24" width="20" height="20"><circle class="ic" cx="12" cy="12" r="3"/><path class="ic" d="M3 8V4h4M21 8V4h-4M3 16v4h4M21 16v4h-4"/></svg></button>
+<button class="tbtn" id="bVoice" aria-label="Voice replies on/off" title="Voice replies"><svg viewBox="0 0 24 24" width="20" height="20"><path class="ic" d="M4 9h4l5-4v14l-5-4H4zM16 9a4 4 0 0 1 0 6"/></svg></button>
+<button class="tbtn" id="lockBtn" aria-label="Lock PARKYY" title="Lock"><svg viewBox="0 0 24 24" width="18" height="18"><rect class="ic" x="5" y="11" width="14" height="10" rx="2"/><path class="ic" d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></button>
+</div>
+
+<button class="tab g" id="tabL" aria-label="Show menu"><svg viewBox="0 0 24 24" width="16" height="16"><path class="ic" d="M9 6l6 6-6 6"/></svg></button>
+<button class="tab g" id="tabR" aria-label="Show dashboard"><svg viewBox="0 0 24 24" width="16" height="16"><path class="ic" d="M15 6l-6 6 6 6"/></svg></button>
+
+<nav id="left" class="drawer g shut">
+<button class="it on"><svg viewBox="0 0 24 24" width="20" height="20"><path class="ic" d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>Home</button>
+<button class="it" data-go="Memory"><svg viewBox="0 0 24 24" width="20" height="20"><path class="ic" d="M12 3a6 6 0 0 0-6 6c0 2.5 1.5 3.8 2.5 5v3h7v-3c1-1.2 2.5-2.5 2.5-5a6 6 0 0 0-6-6zM9.5 21h5"/></svg>Memory</button>
+<button class="it" data-go="Reminders"><svg viewBox="0 0 24 24" width="20" height="20"><rect class="ic" x="4" y="5" width="16" height="15" rx="2"/><path class="ic" d="M4 10h16M9 3v4M15 3v4"/></svg>Reminders</button>
+<button class="it" data-go="Skills"><svg viewBox="0 0 24 24" width="20" height="20"><path class="ic" d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>Skills</button>
+<button class="it" data-go="Files"><svg viewBox="0 0 24 24" width="20" height="20"><path class="ic" d="M4 6h6l2 2h8v11H4z"/></svg>Files</button>
+<button class="it" data-go="Settings"><svg viewBox="0 0 24 24" width="20" height="20"><circle class="ic" cx="12" cy="12" r="3"/><path class="ic" d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>Settings</button>
+<div style="flex:1"></div>
+<div class="card" style="background:rgba(3,5,10,.35);border:1px solid var(--line);padding:10px;gap:8px">
+<span class="mono" style="font-size:11px;letter-spacing:.12em">LOOK</span>
+<label class="mono" style="font-size:12px;display:flex;align-items:center;gap:6px">Glass <input id="glass" type="range" min="25" max="50" step="5" value="35" style="flex:1"><span id="glassV">35%</span></label>
+
+</div>
+</nav>
+
+<aside id="right" class="drawer shut">
+<section class="card g" id="grow"><div style="display:flex;justify-content:space-between;align-items:baseline"><h2>GROWING UP</h2><span class="mono" id="gAge" style="font-size:12px"></span></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline"><b id="gStage" class="disp" style="font-size:18px;letter-spacing:.05em">Baby</b><span class="mono" id="gXp" style="font-size:12px"></span></div>
+<div class="lvl"><i id="gBar" style="width:0%"></i></div>
+<div class="mono" id="gNext" style="font-size:11px;opacity:.85"></div>
+<div class="mono" id="gLife" style="font-size:11px;opacity:.85"></div>
+
+<div class="stat"><span>Knowledge</span><div class="lvl"><i id="sK"></i></div><span class="mono" id="nK"></span></div>
+<div class="stat"><span>Skills</span><div class="lvl"><i id="sS"></i></div><span class="mono" id="nS"></span></div>
+<div class="stat"><span>Experience</span><div class="lvl"><i id="sE"></i></div><span class="mono" id="nE"></span></div>
+<div class="stat"><span>Intelligence</span><div class="lvl"><i id="sI"></i></div><span class="mono" id="nI"></span></div>
+
+
+</section>
+<section class="card g"><h2>TODAY</h2><div id="todayList" style="display:flex;flex-direction:column;gap:6px"><div class="mem" style="opacity:.8">Say “remind me at 6 to call Alex”</div></div></section>
+<section class="card g"><h2>SKILLS</h2><div class="skills" id="skills">
+<button>Code with me</button><button>TouchDesigner</button><button>3D / CAD</button><button>Build a website</button><button>Game dev</button><button>Make an app</button><button>Write a script</button><button>Make an image</button><button>Gadget R&amp;D</button><button>Plan my day</button><button>Track a job</button><button>+ Add a skill</button>
+</div></section>
+<section class="card g"><h2>MEMORY</h2><div id="memList" style="display:flex;flex-direction:column;gap:8px"></div></section>
+<section class="card g"><h2>TOOLS</h2><div style="display:flex;flex-wrap:wrap;gap:7px">
+<span class="chip mono"><span class="dot" style="background:var(--blue)"></span>Memory</span><span class="chip mono"><span class="dot" style="background:var(--blue)"></span>Voice</span><span class="chip mono"><span class="dot" style="background:var(--amber)"></span>Hands</span><span class="chip mono" style="opacity:.6"><span class="dot" style="background:#8A93A8"></span>Calendar</span><span class="chip mono" style="opacity:.6"><span class="dot" style="background:#8A93A8"></span>Email</span>
+</div></section>
+</aside>
+
+<div id="dock">
+<div id="chat">
+</div>
+<div class="bar">
+<label class="g"><input id="msg" placeholder="Type to PARKYY and press Enter" aria-label="Message PARKYY"></label>
+<button id="mic" aria-label="Talk to PARKYY"><svg viewBox="0 0 24 24" width="26" height="26"><rect class="ic" x="9" y="3" width="6" height="11" rx="3"/><path class="ic" d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+</div>
+</div>
+</div>
+
+<div id="bot" class="hidden"><div id="botFace"></div><div id="bubble" class="g"><b id="bT">Hi Saud</b><span id="bS">Drag me anywhere</span></div></div>
+
+
+
+<script>
+const $=id=>document.getElementById(id);
+const PK=window.pk||{token:'parkyy-local',api:'http://127.0.0.1:8000'};
+const T=$('faceT');
+function face(host){host.appendChild(T.content.cloneNode(true));return host.querySelector('svg');}
+const lf=face($('lockFace'));lf.dataset.m='sleeping';
+const bf=face($('botFace'));
+
+// ---- click-through: the transparent parts let clicks fall to your desktop ----
+let over=null;
+addEventListener('mousemove',e=>{
+  const el=document.elementFromPoint(e.clientX,e.clientY);
+  const hit=!!(el&&el.closest('.g,#bot,#mic,.tab,button,input,select,label,#chat'));
+  if(hit!==over){over=hit;window.pk&&window.pk.setClickable(hit);}
+});
+
+// ---- look ----
+$('glass').oninput=e=>{document.documentElement.style.setProperty('--glass',e.target.value/100);$('glassV').textContent=e.target.value+'%';try{localStorage.setItem('pkGlass',e.target.value)}catch(_){}};
+try{const g=localStorage.getItem('pkGlass');if(g){$('glass').value=g;$('glass').oninput({target:$('glass')});}}catch(_){}
+function tick(){const d=new Date();$('clock').textContent=d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' · '+d.toLocaleDateString([],{weekday:'short',day:'numeric',month:'short'});}
+tick();setInterval(tick,15000);
+
+// ---- drawers ----
+const L=$('left'),R=$('right');
+function setL(open){L.classList.toggle('shut',!open);$('tabL').style.left=open?'250px':'0';$('bMenu').classList.toggle('on',open);place();}
+function setR(open){R.classList.toggle('shut',!open);$('tabR').style.right=open?'380px':'0';$('bDash').classList.toggle('on',open);place();if(open)loadMemory();}
+$('tabL').onclick=$('bMenu').onclick=()=>setL(L.classList.contains('shut'));
+$('tabR').onclick=$('bDash').onclick=()=>setR(R.classList.contains('shut'));
+$('bChat').onclick=()=>{$('chat').classList.toggle('fade');$('bChat').classList.toggle('on');};
+$('bFocus').onclick=()=>{setL(false);setR(false);$('chat').classList.add('fade');$('bChat').classList.add('on');};
+
+// ---- robot movement ----
+const bot=$('bot');
+let mode='idle',pinned=null;
+const SIZE={idle:260,listening:300,thinking:230,speaking:210,working:130};
+function spot(m){
+  const w=innerWidth,h=innerHeight,s=SIZE[m]*GS();
+  const rightOpen=!R.classList.contains('shut'),leftOpen=!L.classList.contains('shut');
+  const cx=(leftOpen?250:0)+((w-(leftOpen?250:0)-(rightOpen?380:0))/2);
+  if(m==='idle')      return [cx-s/2, Math.max(80,h*0.12)];
+  if(m==='listening') return [cx-s/2, Math.max(70,h*0.16)];
+  if(m==='thinking')  return [cx-s/2, Math.max(70,h*0.2)];
+  if(m==='speaking')  return [Math.max(20,(w-Math.min(640,w-32))/2-s-24), h-s-150];
+  if(m==='working')   return rightOpen?[w-380-s-10, 150]:[w-s-60, 90];
+}
+function place(){
+  if(bot.classList.contains('hidden'))return;
+  const s=SIZE[mode]*GS();bot.style.width=s+'px';
+  const [x,y]=pinned||spot(mode);bot.style.left=x+'px';bot.style.top=y+'px';
+}
+const TXT={idle:['Hi Saud','Type below, or Ctrl+Space to call me'],listening:['Listening…','Go ahead'],thinking:['Thinking…','Asking my Hermes brain'],speaking:['Speaking',''],working:['Working…','']};
+function setMode(m,sub){
+  mode=m;bf.dataset.m=(m==='working')?'thinking':m;
+  $('bT').textContent=TXT[m][0];$('bS').textContent=sub||TXT[m][1];
+  place();
+  try{window.pk&&pk.mood&&pk.mood(m,sub||'',stage().n.toLowerCase());}catch(_){}   // tell the roaming PARKYY on the desktop
+}
+addEventListener('resize',place);
+let d=null;
+bot.addEventListener('pointerdown',e=>{d={dx:e.clientX-bot.offsetLeft,dy:e.clientY-bot.offsetTop};bot.classList.add('drag');bot.setPointerCapture(e.pointerId);});
+bot.addEventListener('pointermove',e=>{if(!d)return;pinned=[e.clientX-d.dx,e.clientY-d.dy];bot.style.left=pinned[0]+'px';bot.style.top=pinned[1]+'px';});
+bot.addEventListener('pointerup',()=>{d=null;bot.classList.remove('drag');});
+bot.addEventListener('dblclick',()=>{pinned=null;place();});
+
+// ===== growing up: real-life age (1 year = 1 year) decides looks; XP decides abilities =====
+const LIFE=[{n:'Baby',age:0,scale:.62},{n:'Kid',age:3,scale:.78},{n:'Teen',age:13,scale:.9},{n:'Adult',age:18,scale:1}];
+const ABIL=[{xp:0,a:'Chat + remembering things you tell it'},{xp:100,a:'Reminders + planning your day'},{xp:300,a:'Tools: drafting emails, summarising files'},{xp:700,a:'Multi-step tasks on its own (with your OK)'}];
+const YEAR=365*864e5;
+let G={xp:0,k:0,sk:0,ex:0,iq:10,born:Date.now(),lastAge:0};
+try{const t=JSON.parse(localStorage.getItem('pkLife')||'null');if(t)G=Object.assign(G,t);else localStorage.setItem('pkLife',JSON.stringify(G));}catch(e){}
+function age(){return Math.floor((Date.now()-G.born)/YEAR);}
+function stage(){const a=age();let st=LIFE[0];for(const x of LIFE)if(a>=x.age)st=x;return st;}
+function GS(){return stage().scale;}
+function abil(){let r=ABIL[0];for(const x of ABIL)if(G.xp>=x.xp)r=x;return r;}
+function saveG(){try{localStorage.setItem('pkLife',JSON.stringify(G))}catch(e){}}
+function isBday(){return age()>0&&((Date.now()-G.born)%YEAR)<864e5;}
+function drawG(){
+  const st=stage(),a=age(),ab=abil(),nx=ABIL[ABIL.indexOf(ab)+1];
+  document.querySelectorAll('svg.face').forEach(f=>{f.dataset.st=st.n.toLowerCase();f.dataset.bday=isBday()?'1':'0';});
+  const days=Math.floor((Date.now()-G.born)/864e5);
+  $('gStage').textContent=st.n+' · '+(a>0?a+(a===1?' year':' years'):days+(days===1?' day':' days'))+' old';
+  $('lvlChip').textContent=st.n+' · age '+a+' · XP Lv '+(1+Math.floor(G.xp/50));
+  $('lvlChip').title='Age '+a+' (grows 1 year per real year) · Level '+(1+Math.floor(G.xp/50))+' = how much PARKYY has learned (XP)';
+  $('gXp').textContent=G.xp+' XP';
+  $('gBar').style.width=(nx?Math.round(100*(G.xp-ab.xp)/(nx.xp-ab.xp)):100)+'%';
+  $('gNext').textContent=nx?('Next ability at '+nx.xp+' XP → '+nx.a):'All abilities unlocked';
+  const toNext=Math.ceil((YEAR-((Date.now()-G.born)%YEAR))/864e5);
+  $('gAge').textContent=isBday()?'birthday today!':'birthday in '+toNext+' d';
+  const nl=LIFE[LIFE.indexOf(st)+1];$('gLife').textContent=nl?('Grows into a '+nl.n+' at age '+nl.age+' · born '+new Date(G.born).toLocaleDateString()):'All grown up';
+  const set=(b,n,v)=>{$(b).style.width=Math.min(100,v)+'%';$(n).textContent=v;};
+  set('sK','nK',G.k);set('sS','nS',G.sk);set('sE','nE',G.ex);set('sI','nI',G.iq);
+}
+function checkBirthday(){
+  const a=age();if(a<=G.lastAge)return;
+  G.lastAge=a;G.iq+=2;saveG();drawG();place();
+  bot.classList.add('levelup');setTimeout(()=>bot.classList.remove('levelup'),2600);
+  setMode('speaking','Happy birthday to me — I\'m '+a+'!');say('It\'s my birthday — I\'m '+a+' today!','pk');speak('It\'s my birthday! I\'m '+a+' today!');
+}
+function gain(xp,what){
+  const before=abil();G.xp+=xp;
+  if(what==='chat'){G.ex+=1;}
+  if(what==='skill'){G.sk+=2;G.ex+=2;}
+  if(what==='learn'){G.k+=2;}
+  saveG();drawG();
+  if(abil()!==before)setTimeout(()=>say('Level up! New ability: '+abil().a+'.','pk'),400);
+}
+$('lvlChip').onclick=()=>setR(true);
+setInterval(()=>{checkBirthday();drawG();},60000);
+
+// ---- memory panel (real, from the backend) ----
+async function loadMemory(){
+  try{
+    const r=await fetch(PK.api+'/memory',{headers:{Authorization:'Bearer '+PK.token}});
+    const j=await r.json();const box=$('memList');box.innerHTML='';
+    const f=(j.facts||[]).slice(-4).reverse();
+    if(!f.length){const e=document.createElement('div');e.className='mem';e.style.opacity=.7;e.textContent='Nothing yet — just chat, I learn as we talk';box.appendChild(e);}
+    f.forEach(t=>{const e=document.createElement('div');e.className='mem';e.textContent=t;box.appendChild(e);});
+    if((j.facts||[]).length>G.k/2){G.k=Math.max(G.k,(j.facts||[]).length*2);saveG();drawG();}
+  }catch(e){}
+}
+
+// ---- things PARKYY learned on its own ----
+function showLearned(list){
+  (list||[]).forEach(f=>{say('📝 I learned: '+f+'  (say “forget …” if that\'s wrong)','pk note');gain(10,'learn');});
+  if(list&&list.length)loadMemory();
+}
+async function checkLearned(){
+  try{const r=await fetch(PK.api+'/learned',{headers:{Authorization:'Bearer '+PK.token}});if(r.ok){const j=await r.json();showLearned(j.learned);showNotes(j.notes);}}catch(e){}
+}
+
+// ---- PARKYY reads the world: daily brief + asks before studying new topics ----
+let askedTopic='';
+async function checkWorld(){
+  try{
+    const r=await fetch(PK.api+'/world',{headers:{Authorization:'Bearer '+PK.token}});if(!r.ok)return;const w=await r.json();
+    let seen='';try{seen=localStorage.getItem('pkBrief')||'';}catch(e){}
+    if(w.brief&&w.brief_date!==seen){
+      say('📰 '+w.brief.replace(/^#.*\n+/,''),'pk note');gain(10,'learn');
+      try{localStorage.setItem('pkBrief',w.brief_date);}catch(e){}
+    }
+    if(w.pending&&w.pending.topic!==askedTopic){
+      askedTopic=w.pending.topic;
+      const e=document.createElement('div');e.className='pk g';
+      e.textContent='🔍 I keep seeing “'+w.pending.topic+'” in the news. '+(w.pending.why||'')+' Want me to keep up with it? ';
+      [['Yes, go!',true],['No thanks',false]].forEach(([t,v])=>{const b=document.createElement('button');b.textContent=t;b.className='askbtn';
+        b.onclick=async()=>{e.querySelectorAll('button').forEach(x=>x.remove());
+          const a=await fetch(PK.api+'/world/answer',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+PK.token},body:JSON.stringify({yes:v})});
+          const j=await a.json();say(j.reply,'pk');if(v)gain(10,'learn');};e.appendChild(b);});
+      $('chat').appendChild(e);$('chat').scrollTop=1e9;
+    }
+  }catch(e){}
+}
+setTimeout(checkWorld,20000);setInterval(checkWorld,30*60000);
+
+// ---- PARKYY upgrading itself: it asks, Saud decides ----
+function showNotes(list){(list||[]).forEach(t=>{say(t,'pk note');gain(20,'learn');});if(list&&list.length)loadSkills();}
+const asked=new Set();
+function askCard(text,buttons){
+  const e=document.createElement('div');e.className='pk g';e.textContent=text+' ';
+  buttons.forEach(([t,fn])=>{const b=document.createElement('button');b.textContent=t;b.className='askbtn';
+    b.onclick=async()=>{e.querySelectorAll('button').forEach(x=>x.remove());await fn();};e.appendChild(b);});
+  $('chat').appendChild(e);$('chat').scrollTop=1e9;
+}
+const KIND={brain:'🧠 Brain upgrade?',skill:'✨ New skill?',idea:'🛠️ Upgrade idea for me?'};
+async function checkProposals(){
+  try{
+    const r=await fetch(PK.api+'/proposals',{headers:{Authorization:'Bearer '+PK.token}});if(!r.ok)return;
+    (await r.json()).pending.forEach(p=>{
+      if(asked.has(p.id))return;asked.add(p.id);
+      const extra=p.kind==='skill'?' It would: '+p.data.steps:p.kind==='idea'?' How: '+(p.data.how||''):'';
+      const reply=async v=>{const a=await fetch(PK.api+'/proposals/answer',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+PK.token},body:JSON.stringify({id:p.id,yes:v})});
+        const j=await a.json();say(j.reply,'pk');if(v){gain(25,'skill');loadSkills();}};
+      askCard(KIND[p.kind]+' “'+p.title+'” — '+p.why+extra,[['Yes',()=>reply(true)],['No',()=>reply(false)]]);
+    });
+  }catch(e){}
+}
+setTimeout(checkProposals,25000);setInterval(checkProposals,20*60000);
+// skills PARKYY learned get their own buttons
+async function loadSkills(){
+  try{
+    const r=await fetch(PK.api+'/skills',{headers:{Authorization:'Bearer '+PK.token}});if(!r.ok)return;
+    (await r.json()).skills.forEach(k=>{
+      if([...document.querySelectorAll('#skills button')].some(b=>b.textContent.trim()===k.name))return;
+      const b=document.createElement('button');b.textContent=k.name;b.title='Learned skill';
+      b.onclick=()=>ask('Use your skill "'+k.name+'" to help me.',k.name);$('skills').appendChild(b);
+    });
+  }catch(e){}
+}
+setTimeout(loadSkills,8000);
+
+// ---- tools: PARKYY asks before it does anything ----
+function showAsks(list){
+  (list||[]).forEach(a=>{
+    if(asked.has(a.id))return;asked.add(a.id);
+    const reply=async v=>{const r=await fetch(PK.api+'/confirm',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+PK.token},body:JSON.stringify({id:a.id,yes:v})});
+      const j=await r.json();setMode(v?'working':'idle',v?'On it!':'');say(j.reply,'pk');if(v){gain(15,'skill');setTimeout(()=>setMode('idle'),2500);}loadToday();};
+    askCard('🙋 Can I '+a.text+'?',[['Yes',()=>reply(true)],['No',()=>reply(false)]]);
+  });
+}
+// reminders + everything PARKYY wants to tell you, checked every 15 s
+async function pollEvents(){
+  try{
+    const r=await fetch(PK.api+'/events',{headers:{Authorization:'Bearer '+PK.token}});if(!r.ok)return;const j=await r.json();
+    (j.events||[]).forEach(ev=>{
+      if(ev.kind==='lock'){try{lock();}catch(e){}return;}
+      if(ev.kind==='alert'||ev.kind==='briefing'){
+        if(ev.kind==='briefing'||ev.speak!==false){window.pk&&window.pk.show&&window.pk.show();}
+        say(ev.text,'pk');
+        if(ev.speak!==false){setMode('speaking',ev.kind==='briefing'?'🌅 Briefing':'🔔 Heads up');
+          speak(ev.kind==='briefing'?ev.text.replace(/\n/g,'. ').slice(0,900):ev.text);setTimeout(()=>{if(mode==='speaking')setMode('idle');},9000);}
+        try{new Notification(ev.kind==='briefing'?'PARKYY briefing 🌅':'PARKYY 🔔',{body:ev.text.slice(0,240),silent:ev.speak===false});}catch(e){}
+        return;
+      }
+      if(ev.kind!=='reminder')return;
+      window.pk&&window.pk.show&&window.pk.show();
+      setMode('speaking','⏰ Reminder!');say('⏰ Reminder: '+ev.text,'pk');speak('Hey Saud! Reminder: '+ev.text);
+      try{new Notification('PARKYY reminder ⏰',{body:ev.text,silent:false});}catch(e){}
+      setTimeout(()=>{if(mode==='speaking')setMode('idle');},8000);
+    });
+    showLearned(j.learned);showNotes(j.notes);showAsks(j.asks);
+    if((j.events||[]).length)loadToday();
+  }catch(e){}
+}
+setInterval(pollEvents,5000);
+// TODAY card: real reminders + to-dos
+async function loadToday(){
+  try{
+    const r=await fetch(PK.api+'/today',{headers:{Authorization:'Bearer '+PK.token}});if(!r.ok)return;const t=await r.json();
+    const box=$('todayList');box.innerHTML='';
+    t.reminders.forEach(x=>{const e=document.createElement('div');e.className='mem';e.textContent='⏰ '+x.at+' · '+x.text;box.appendChild(e);});
+    t.todos.forEach(x=>{const e=document.createElement('div');e.className='mem';e.style.cursor='pointer';e.title='Tap to tick off';
+      e.textContent='☐ '+x.text;e.onclick=()=>ask('Tick off to-do #'+x.id+' ('+x.text+')');box.appendChild(e);});
+    if(t.jobs){const e=document.createElement('div');e.className='mem';e.style.opacity=.8;e.textContent='💼 '+t.jobs+' job application'+(t.jobs>1?'s':'')+' tracked';box.appendChild(e);}
+    if(!box.children.length){const e=document.createElement('div');e.className='mem';e.style.opacity=.8;e.textContent='Nothing today — say “remind me at 6 to call Alex”';box.appendChild(e);}
+  }catch(e){}
+}
+setTimeout(loadToday,6000);setInterval(loadToday,5*60000);
+// show the phone install link
+async function showPhoneUrl(){try{const r=await fetch(PK.api+'/whoami');if(!r.ok)return;const j=await r.json();
+  const box=$('todayList');const e=document.createElement('div');e.className='mem';e.style.cssText='opacity:.9;border:1px dashed rgba(255,143,196,.5);cursor:pointer';
+  e.textContent='📱 Phone app: '+j.phone_url+'  (open on your phone → Add to Home screen)';
+  e.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(j.phone_url);say('Phone link copied: '+j.phone_url,'pk note');};
+  box.appendChild(e);}catch(e){}}
+setTimeout(showPhoneUrl,6500);
+
+// ---- health: is the brain awake? ----
+async function health(){
+  let ok=false;try{ok=(await fetch(PK.api+'/health')).ok;}catch(e){}
+  $('netDot').style.background=ok?'#3DDC97':'#FFB547';$('netTxt').textContent=ok?'Brain ready':'Brain starting…';
+  return ok;
+}
+health();setInterval(health,10000);
+
+// ---- swappable brains: local (free) / Claude / GPT / Gemini, or Auto ----
+const BRAIN_ICON={local:'💻',claude:'✦',gpt:'⚡',gemini:'✧',auto:'🧠'};
+let brainInfo=null;
+async function loadBrain(){
+  try{const r=await fetch(PK.api+'/brain',{headers:{Authorization:'Bearer '+PK.token}});if(!r.ok)return;brainInfo=await r.json();drawBrain();}catch(e){}
+}
+function drawBrain(){
+  if(!brainInfo)return;const m=brainInfo.mode;
+  const name=m==='auto'?'Auto':(brainInfo.labels[m]||m).replace(/ .*/,'');
+  $('brainChip').textContent=(BRAIN_ICON[m]||'🧠')+' '+name+(brainInfo.online?'':' ·offline');
+}
+$('brainChip').onclick=async()=>{
+  const opts=['auto','local',...['claude','gpt','gemini']];
+  const cur=brainInfo?brainInfo.mode:'auto';let next=opts[(opts.indexOf(cur)+1)%opts.length];
+  const r=await fetch(PK.api+'/brain/set',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+PK.token},body:JSON.stringify({mode:next})});
+  const j=await r.json();say(j.reply,'pk note');await loadBrain();
+};
+setTimeout(loadBrain,4000);setInterval(loadBrain,60000);
+
+// ---- voice input: "Hey PARKYY" ears run in voice_input.py; this reacts to them ----
+let micLive=false;
+async function pollVoice(){
+  try{
+    const r=await fetch(PK.api+'/voice/pull',{headers:{Authorization:'Bearer '+PK.token}});if(!r.ok){micLive=false;return;}
+    micLive=true;const j=await r.json();
+    (j.events||[]).forEach(ev=>{
+      if(ev.kind==='interrupt'){
+        try{speechSynthesis.cancel();if(curAudio){curAudio.pause();curAudio=null;}}catch(e){}
+        setMode('listening','🎤 Yes? I stopped - go ahead');return;
+      }
+      if(ev.kind==='wake'){
+        try{speechSynthesis.cancel();if(curAudio){curAudio.pause();curAudio=null;}}catch(e){}
+        window.pk&&window.pk.show&&window.pk.show();
+        if(!$('lock').classList.contains('hidden'))unlock();
+        else{setMode('listening','🎤 Listening…');$('msg').focus();}
+      }else if(ev.kind==='said'&&ev.text){
+        if(!$('lock').classList.contains('hidden'))unlock();
+        say('🎤 '+ev.text,'me');
+        setTimeout(()=>doAsk(ev.text),$('lock').classList.contains('hidden')?200:1600);
+      }
+    });
+  }catch(e){micLive=false;}
+}
+setInterval(pollVoice,1200);
+function setMicUI(){$('mic').classList.toggle('live',micLive);$('mic').title=micLive?'Listening for “Hey PARKYY”':'Say “Hey PARKYY”, or run VOICE.bat to enable the mic';}
+setInterval(setMicUI,1500);
+
+// ---- voice out (Windows' built-in voice, offline) ----
+let voiceOn=true;
+let curAudio=null;
+// tell the backend "I'm talking" so the Hey-PARKYY ears don't hear PARKYY's own voice
+function micBusy(s){try{fetch(PK.api+'/mic/busy',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+PK.token},body:JSON.stringify({secs:s})}).catch(()=>{});}catch(e){}}
+function fallbackSpeak(t){if(!window.speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=1.05;u.pitch=1.15;u.onstart=()=>micBusy(Math.min(90,2+t.length/12));u.onend=()=>micBusy(0.8);speechSynthesis.speak(u);}
+async function speak(t){
+  try{window.pk&&pk.petSay&&pk.petSay(String(t).replace(/[*_`#>]/g,'').slice(0,140));}catch(_){}
+  if(!voiceOn)return;t=t.replace(/[*_#`]/g,'');
+  if(curAudio){curAudio.pause();curAudio=null;}
+  try{
+    const r=await fetch(PK.api+'/speak',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+PK.token},body:JSON.stringify({text:t,stage:stage().n.toLowerCase()})});
+    if(!r.ok)throw 0;
+    const url=URL.createObjectURL(await r.blob());curAudio=new Audio(url);
+    curAudio.onended=()=>{micBusy(0.8);URL.revokeObjectURL(url);if(mode==='speaking')setMode('idle');};
+    curAudio.onpause=()=>micBusy(0.8);
+    curAudio.onplay=function(){micBusy((isFinite(this.duration)?this.duration:30)+0.8);};
+    await curAudio.play();
+  }catch(e){fallbackSpeak(t);}
+}
+$('bVoice').onclick=()=>{voiceOn=!voiceOn;$('bVoice').classList.toggle('on',voiceOn);if(!voiceOn){speechSynthesis.cancel();if(curAudio)curAudio.pause();}};
+$('bVoice').classList.add('on');
+
+// ---- talking to PARKYY for real ----
+function mdLite(t){return String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])).replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>').replace(/(^|[\s(])\*([^*\n]+)\*(?=[\s).,!?]|$)/g,'$1<i>$2</i>');}
+function say(t,cls){const e=document.createElement('div');e.className=cls;if(String(cls).split(' ')[0]==='pk')e.innerHTML=mdLite(t);else e.textContent=t;if(cls==='pk')e.classList.add('g');$('chat').appendChild(e);$('chat').scrollTop=1e9;}
+function doAsk(text){return ask(text);}
+// "move to display 2" / "open yourself on the other screen" - handled right here, no brain needed
+const DISP_RE=/\b(?:move|open|show|put|go|switch|shift|take|send|bring)\b.*?\b(?:disp\w*|desktop|screen|monitor)\s*(?:number\s*)?(\d|one|two|to|too|three|1st|2nd|3rd|first|second|third|main|other|next|laptop|big)?\b/i;
+const NUMW={one:1,two:2,to:2,too:2,three:3,first:1,second:2,third:3,'1st':1,'2nd':2,'3rd':3};
+async function tryDisplay(text){
+  if(!(window.pk&&window.pk.moveDisplay))return false;
+  // spoken commands mishear the name ("open particular on display to"), so the screen words are enough
+  if(!/\b(?:disp\w*|screen|monitor|desktop)\s*(?:number\s*)?(?:\d|one|two|to|too|three|1st|2nd|3rd|first|second|third|main|other|next|laptop|big)\b/i.test(text)
+     &&!/\b(parkyy|yourself|you|urself|u)\b/i.test(text)&&!/^\s*(?:move|go|switch)\b/i.test(text))return false;
+  const m=text.match(DISP_RE);if(!m)return false;
+  const w=(m[1]||'next').toLowerCase();
+  const which=/^\d$/.test(w)?+w:(NUMW[w]||(/\b(main|laptop|primary)\b/i.test(text)?'main':'next'));
+  say(text,'me');
+  const r=await window.pk.moveDisplay(which);
+  const t=r.ok?(r.count<2?'You only have one screen connected right now 🖥️':'Moved to screen '+r.index+(r.main?' (your main screen)':'')+' 🎀'):'I only see '+r.count+' screen'+(r.count>1?'s':'')+' - try “move to screen 1” or “screen 2”.';
+  say(t,'pk');speak(t);setMode('happy',t);setTimeout(()=>setMode('idle'),2500);return true;
+}
+async function ask(text,asSkill){
+  if(!asSkill&&await tryDisplay(text))return;
+  say(text,'me');pinned=null;setMode(asSkill?'working':'thinking',asSkill?'On it: '+asSkill:'');
+  try{
+    const r=await fetch(PK.api+'/chat',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+PK.token},body:JSON.stringify({message:text})});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const j=await r.json();const reply=j.reply||'(no reply)';
+    setMode('speaking',asSkill?'Done: '+asSkill:(j.brain?'via '+j.brain:''));say(reply,'pk');speak(reply);
+    if(j.brain&&brainInfo&&brainInfo.mode==='auto'){$('brainChip').title='Last answer via '+j.brain;}
+    gain(asSkill?30:15,asSkill?'skill':'chat');
+    if(/^\s*(please\s+)?remember/i.test(text)){gain(10,'learn');loadMemory();}
+    showLearned(j.learned);showNotes(j.notes);showAsks(j.asks);setTimeout(checkLearned,15000);setTimeout(checkLearned,40000);
+    const ms=Math.min(12000,1500+reply.length*55);setTimeout(()=>{if(mode==='speaking')setMode('idle');},ms);
+  }catch(e){
+    setMode('idle','Backend not answering');say('I can\'t reach my backend right now — it may still be starting (or restarting). Give it ~20 seconds and try again.','pk');
+  }
+}
+$('msg').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.value.trim()){const t=e.target.value.trim();e.target.value='';ask(t);}});
+const SKILLP={'Code with me':'Let\'s code. Ask me what I\'m building or the bug I have, in which language. When we have code, offer to save it into a project with your write_project_file tool and to run it with run_python.','TouchDesigner':'Help me with my TouchDesigner hologram project (MediaPipe hand tracking, TOPs/CHOPs, GLSL). Ask what effect I want. Offer to save scripts into a touchdesigner project.','3D / CAD':'Help me with 3D modelling or CAD (Blender, KiCad, CAD for my gadgets). Ask what I\'m making. Offer a Blender build script I can run.','Build a website':'Help me build a website. Ask what it\'s for, then create a web project and write real HTML/CSS/JS files into it with your tools.','Game dev':'Help me make a game. Ask the idea and style, then scaffold a game project and build it step by step.','Make an app':'Help me build an app (Android or desktop). Ask what it should do, then scaffold an app project.','Write a script':'Help me write a script - film, video, vlog, or story. Ask the topic, length and tone, then offer to save it as a note or project file.','Make an image':'Make me an image. Ask what to draw and the style, then use your generate_image tool. If it isn\'t set up, offer to help set up free local Stable Diffusion.','Gadget R&D':'I want to work on a gadget idea (electronics, IoT, firmware). Ask what I\'m building.','Plan my day':'Help me plan my day. Ask what I need to get done, and offer to set reminders and to-dos.','Track a job':'Help me track a job application. Ask the company, role and status, then use your add_job tool.'};
+document.querySelectorAll('#skills button').forEach(b=>b.onclick=()=>{const n=b.textContent.trim();if(SKILLP[n])ask(SKILLP[n],n);else ask('upgrade yourself','Finding new skills');});
+// ---- tap the mic (or show your open palm) and just talk - PARKYY listens until you stop ----
+let listening=false,stopListening=null,pyListening=false;
+const AUTH=()=>({Authorization:'Bearer '+PK.token});
+async function listenNow(){
+  if(listening){if(stopListening)stopListening();else if(pyListening)fetch(PK.api+'/listen/stop',{method:'POST',headers:AUTH()}).catch(()=>{});return;}
+  listening=true;
+  if(!$('lock').classList.contains('hidden'))unlock();
+  try{speechSynthesis.cancel();if(curAudio)curAudio.pause();}catch(e){}
+  // 1) PARKYY's backend listens through Windows directly (most reliable)
+  $('mic').classList.add('hot');setMode('listening','🎤 I\'m listening… talk now  (tap 🎤 to send)');
+  pyListening=true;let j=null;
+  try{const r=await fetch(PK.api+'/listen',{method:'POST',headers:AUTH()});if(r.ok)j=await r.json();}catch(e){}
+  pyListening=false;
+  if(j&&!j.failed&&j.heard!==undefined){$('mic').classList.remove('hot');listening=false;return heardResult(j);}
+  // 2) fallback: listen through this window
+  return windowListen();
+}
+function heardResult(j){
+  let text=(j.text||'').trim();
+  if(/^(i am sorry\.?|i'm sorry\.?|thank you\.?|thanks for watching!?|you|bye\.?|\.+|okay\.?)$/i.test(text))text='';
+  if(text){ask(text);return;}
+  if(j.heard===false){setMode('idle','I didn\'t hear anything 🙉');
+    say('🎤 “'+(j.mic||'your mic')+'” sounds silent. Check Settings → Privacy & security → Microphone (“Let desktop apps access your microphone” ON) and that the laptop\'s mic-mute key (F4) is off.','pk note');return;}
+  setMode('idle','Sorry, I couldn\'t catch that 🙈');
+  if(j.error)say('🎤 I couldn\'t turn that into words ('+String(j.error).slice(0,140)+')','pk note');
+}
+async function windowListen(){
+  let stream;
+  let micName='';
+  try{
+    let mics=[];try{mics=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='audioinput'&&d.deviceId!=='communications');}catch(e){}
+    let want='';try{want=localStorage.getItem('pkMic')||'';}catch(e){}
+    const pick=mics.find(m=>m.deviceId===want);
+    // keep Windows/Chrome's voice processing ON - your Intel mic array is very quiet without it
+    stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:true,
+      ...(pick?{deviceId:{exact:pick.deviceId}}:{})}});
+    const tr=stream.getAudioTracks()[0];micName=(tr&&tr.label)||'default mic';
+  }
+  catch(e){listening=false;setMode('idle');say('I can\'t use the microphone: '+e.message,'pk note');return;}
+  $('mic').classList.add('hot');setMode('listening','🎤 I\'m listening… talk now');
+  const ctx=new AudioContext();const src=ctx.createMediaStreamSource(stream);const proc=ctx.createScriptProcessor(4096,1,1);
+  const chunks=[],calib=[];let started=false,silentFor=0,noise=0.004,peak=0,lastUi=0,voice=0,smooth=0;const t0=performance.now();
+  const heard=await new Promise(res=>{
+    stopListening=()=>res(true);                                        // tap the mic again = "I'm done, send it"
+    proc.onaudioprocess=e=>{
+      const d=e.inputBuffer.getChannelData(0);chunks.push(new Float32Array(d));
+      let q=0;for(let i=0;i<d.length;i++)q+=d[i]*d[i];const rms=Math.sqrt(q/d.length);peak=Math.max(peak,rms);
+      const el=performance.now()-t0,dt=d.length/ctx.sampleRate*1000;
+      if(el<250){calib.push(rms);noise=Math.min(0.02,Math.max(0.003,Math.min(...calib)));return;}
+      smooth=smooth*0.6+rms*0.4;
+      // noisy room: "quiet" = clearly softer than your voice, not total silence
+      const thr=Math.max(0.01,noise*2.2,voice*0.35);
+      if(smooth>thr){started=true;silentFor=0;voice=Math.max(voice*0.995,smooth);}
+      else{if(started)silentFor+=dt;noise=noise*0.97+smooth*0.03;}
+      if(el-lastUi>200){lastUi=el;const bars=Math.min(8,Math.round(rms/thr*3));
+        setMode('listening','🎤 '+(started?'hearing you ':'talk now ')+'▮'.repeat(bars)+'▯'.repeat(8-bars)+'  (tap 🎤 to send)');}
+      if((started&&silentFor>1200)||el>12000||(!started&&el>8000))res(started||peak>0.006);
+    };
+    src.connect(proc);proc.connect(ctx.destination);
+  });
+  stopListening=null;
+  proc.disconnect();src.disconnect();stream.getTracks().forEach(t=>t.stop());
+  const rate=ctx.sampleRate;ctx.close();$('mic').classList.remove('hot');listening=false;
+  if(!heard){setMode('idle','I didn\'t hear anything 🙉');
+    // silent? automatically try the next microphone on this laptop
+    let mics=[];try{mics=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='audioinput'&&d.deviceId!=='communications');}catch(e){}
+    let cur='';try{cur=localStorage.getItem('pkMic')||'';}catch(e){}
+    if(mics.length>1){
+      const i=mics.findIndex(m=>m.deviceId===cur);const nx=mics[(i+1)%mics.length];
+      try{localStorage.setItem('pkMic',nx.deviceId);}catch(e){}
+      say('🎤 “'+micName+'” sounded silent (level '+Math.round(peak*1000)+'), so I switched to “'+(nx.label||'the next mic')+'”. Tap 🎤 and try again. (Mics I can see: '+mics.map(m=>m.label||'?').join(' · ')+')','pk note');
+    }else{
+      say('🎤 “'+micName+'” sounds silent (level '+Math.round(peak*1000)+'). Windows may be blocking it: Settings → Privacy & security → Microphone → turn ON “Let desktop apps access your microphone”. Also check Settings → System → Sound → Input.','pk note');
+    }
+    return;}
+  setMode('thinking','✍️ Catching your words…');
+  let n=0;chunks.forEach(c=>n+=c.length);const all=new Float32Array(n);let o=0;chunks.forEach(c=>{all.set(c,o);o+=c.length;});
+  const ratio=rate/16000,outN=Math.floor(n/ratio),pcm=new Int16Array(outN);
+  let mx=0;for(let i=0;i<n;i++){const v=Math.abs(all[i]);if(v>mx)mx=v;}
+  const gain=Math.min(10,0.9/Math.max(mx,1e-4));                       // quiet mic? turn it up before sending
+  for(let i=0;i<outN;i++){const a=Math.floor(i*ratio),b=Math.min(n,Math.floor((i+1)*ratio));let q=0;for(let j=a;j<b;j++)q+=all[j];
+    pcm[i]=Math.max(-1,Math.min(1,gain*q/Math.max(1,b-a)))*32767;}
+  try{
+    const r=await fetch(PK.api+'/transcribe',{method:'POST',headers:{'Content-Type':'application/octet-stream',Authorization:'Bearer '+PK.token},body:pcm.buffer});
+    if(r.status===404){setMode('idle');say('🎤 My hearing needs a backend restart - double-click RELOAD-BACKEND.bat in the PARKYY folder, then try again.','pk note');return;}
+    const j=await r.json();let text=(j.text||'').trim();
+    if(/^(i am sorry\.?|i'm sorry\.?|thank you\.?|thanks for watching!?|you|bye\.?|\.+|okay\.?)$/i.test(text))text='';   // background-noise guesses
+    if(!text){setMode('idle','Sorry, I couldn\'t catch that 🙈');
+      if(j.error)say('🎤 I couldn\'t turn that into words ('+j.error.slice(0,140)+(j.loudness!==undefined?' · mic loudness '+j.loudness:'')+')','pk note');
+      else if(j.loudness!==undefined&&j.loudness<300)say('🎤 Your mic sounds almost silent (loudness '+j.loudness+'). Check Windows Settings → Sound → Input and pick the right microphone.','pk note');
+      return;}
+    ask(text);
+  }catch(e){setMode('idle');say('I couldn\'t turn that into words - is my backend running?','pk note');}
+}
+$('mic').onclick=()=>listenNow();
+document.querySelectorAll('.box').forEach(b=>b.onclick=()=>b.classList.toggle('done'));
+
+// ---- lock / unlock ----
+function setLockText(t,s){$('lockTitle').textContent=t;$('lockSub').textContent=s;
+  // PIN / emergency messages need the big card; plain sleep stays a small corner pill
+  $('lock').classList.toggle('mini',/asleep|Heard you|Welcome back/i.test(t)&&!/PIN/i.test(s));}
+function unlock(){
+  lf.dataset.m='listening';setLockText('Heard you…','Waking up');
+  setTimeout(()=>{lf.dataset.m='speaking';setLockText('Welcome back, Saud!','Unlocking…');speak('Welcome back, Saud!');},900);
+  setTimeout(()=>{$('lock').classList.add('hidden');$('app').classList.remove('hidden');bot.classList.remove('hidden');drawG();setMode('idle');setTimeout(checkBirthday,1500);},2000);
+}
+function lock(){$('app').classList.add('hidden');bot.classList.add('hidden');$('lock').classList.remove('hidden');lf.dataset.m='sleeping';setLockText('PARKYY is asleep','Say “Hey PARKYY”, press Ctrl+Space, or tap below to wake me');$('wakeBtn').textContent='Wake';window.pk&&window.pk.sendBack&&window.pk.sendBack();}
+$('wakeBtn').onclick=unlock;
+$('lockBtn').onclick=lock;
+window.pk&&window.pk.onSummon(()=>{if(!$('lock').classList.contains('hidden'))unlock();else{setMode('listening','You called?');setTimeout(()=>setMode('idle'),2000);$('msg').focus();}});
+window.pk&&window.pk.onLock(lock);
+drawG();
+// when PARKYY roams the whole desktop, the big face here steps aside (never two PARKYYs)
+const setOvl=on=>bot.classList.toggle('ovl',!!on);
+if(window.pk&&pk.onOverlay){pk.onOverlay(setOvl);pk.overlayGet().then(setOvl).catch(()=>{});}
+</script>
+<script src="hands.js"></script>
+<script src="hud.js"></script>
+</body>
+</html>

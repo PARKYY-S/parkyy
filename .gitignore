@@ -1,0 +1,54 @@
+# ===== PARKYY: keep secrets and personal data OUT of GitHub =====
+# Secrets / keys / tokens
+.env
+.env.*
+!.env.example
+voice.env
+google-credentials.json
+**/google-token.json
+**/github-token.txt
+**/keys.env
+*.pem
+*.key
+
+# Personal data (memory, chats, recordings, notes, projects)
+data/*
+!data/bench_history.json
+memory/
+knowledge/
+notes/
+projects/
+about-saud.md
+*.wav
+*.log
+news-check.log
+PARKYY-USB/memory/
+PARKYY-USB/logs/
+PARKYY-USB/pet-state.txt
+
+# Big downloads / models / virtual environments
+models/
+voice-model/
+voices/
+venv/
+node_modules/
+PARKYY-USB/models/
+PARKYY-USB/llamafile*
+*.gguf
+*.llamafile
+
+# Build / caches / backups
+__pycache__/
+*.pyc
+.npm-cache/
+.gradle/
+.idea/
+build/
+captures/
+.externalNativeBuild
+.cxx
+local.properties
+*.iml
+.DS_Store
+_backup-before-pet/
+*.bak*
