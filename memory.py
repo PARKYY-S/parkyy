@@ -129,10 +129,18 @@ class Memory:
         gone = [f for f in self.facts if meta.get(f, {}).get("expires") and meta[f]["expires"] < today]
         if gone:
             _write(self.dir / "memory.txt", [f for f in self.facts if f not in gone])
+            self._retire(gone)            # so a sync with the USB stick can't bring them back
             for f in gone:
                 meta.pop(f, None)
             self._save_meta(meta)
+            self.sync()
         return gone
+
+    def _retire(self, facts: list[str]):
+        """Record facts that were removed (replaced or expired) in forgotten.txt, like forget() does.
+        Without this, sync() would merge them back from the USB copy of memory.txt."""
+        if facts:
+            _write(self.dir / "forgotten.txt", _unique(self.forgotten + list(facts)))
 
     def add(self, fact: str, source: str = "user") -> None:
         fact = fact.strip()
@@ -140,6 +148,7 @@ class Memory:
             return
         # same subject with a new value? keep the old one in history instead of silently overwriting
         m = SUBJECT_RE.match(fact)
+        replaced = []
         if m:
             subj = m.group(1).casefold().strip()
             for old in self.facts:
@@ -149,6 +158,8 @@ class Memory:
                         fh.write(_json.dumps({"date": _time.strftime("%Y-%m-%d %H:%M"), "subject": m.group(1),
                                               "old": old, "new": fact}, ensure_ascii=False) + "\n")
                     _write(self.dir / "memory.txt", [f for f in self.facts if f != old])
+                    replaced.append(old)
+        self._retire(replaced)            # the old value must not come back from the USB copy
         meta = self._meta()
         meta.setdefault(fact, _meta_for(fact, source))
         self._save_meta(meta)
